@@ -24,20 +24,20 @@
 #define HIGH "1"
 #define LOW "0"
 
-int write_to_fs(int write_max, char format[], char path[], char file[]){
+int write_to_fs(int write_max, char format[], char path[]){
     char buffer[write_max];
     ssize_t bytes_formatted, bytes_written;
 
     int fd = open(path, O_WRONLY);
     if(fd == -1) {
-        fprintf(stderr, "Failed to open %s", file);
+        fprintf(stderr, "Failed to open file");
         return -1;
     }
 
     bytes_formatted = snprintf(buffer, write_max, format);
     bytes_written = write(fd, buffer, bytes_formatted);
     if(bytes_written == -1) {
-        fprintf(stderr, "Failed to write to %s", file);
+        fprintf(stderr, "Failed to write on file");
         return -1;
     }
     close(fd);
@@ -48,7 +48,17 @@ int write_to_fs(int write_max, char format[], char path[], char file[]){
 void gpio_export(char pin[]) {
     char export_path[] = "/sys/class/gpio/export";
     
-    write_to_fs(2, pin, export_path, "gpio export");
+    if(write_to_fs(2, pin, export_path) == -1) {
+        fprintf(stderr, "Failed to export pin %s", pin);
+    }
+}
+
+void gpio_unexport(char pin[]) {
+    char export_path[] = "/sys/class/gpio/unexport";
+    
+    if(write_to_fs(2, pin, export_path) == -1) {
+        fprintf(stderr, "Failed to unexport pin %s", pin);
+    }
 }
 
 void gpio_set_direction(char pin[], char dir[]) {
@@ -56,7 +66,9 @@ void gpio_set_direction(char pin[], char dir[]) {
     char direction_path[direction_max];
 
     snprintf(direction_path, 3, "/sys/class/gpio/gpio%s/direction", pin);
-    write_to_fs(3, dir, direction_path, "gpio direction");
+    if(write_to_fs(3, dir, direction_path) == -1) {
+        fprintf(stderr, "Failed to set the direction of pin %s", pin);
+    }
 }
 
 void gpio_write(char pin[], char value[]) {
@@ -64,7 +76,9 @@ void gpio_write(char pin[], char value[]) {
     char value_path[value_max];
 
     snprintf(value_path, value_max, "/sys/class/gpio/gpio%s/value", pin);
-    write_to_fs(1, value, value_path, "gpio value");
+    if(write_to_fs(1, value, value_path) == -1) {
+        fprintf(stderr, "Failed to write on pin %s", pin);
+    }
 }
 
 int main(void) {
@@ -89,6 +103,10 @@ int main(void) {
         gpio_write(RED_PIN, HIGH); sleep(5);
         gpio_write(RED_PIN, LOW);
     }
+
+    gpio_unexport(GREEN_PIN);
+    gpio_unexport(YELLOW_PIN);
+    gpio_unexport(RED_PIN);
     
     return 0;
 }
