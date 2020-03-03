@@ -23,20 +23,26 @@
 #define CYCLE 2
 
 int main(void) {
+    // initializes the wiringPi
     wiringPiSetup();
+
+    // sets the mode of the pins to output
     pinMode(GREEN, OUTPUT);
     pinMode(YELLOW, OUTPUT);
     pinMode(RED, OUTPUT);
 
     for (int i = 0; i < CYCLE; i++) {
+        // turns on the green LED for 6 seconds
         printf("GO!\n");
         digitalWrite(GREEN, HIGH); delay(6000);
         digitalWrite(GREEN, LOW);
 
+        // turns on the yellow LED for 1.5 seconds
         printf("Proceed with caution...\n");
         digitalWrite(YELLOW, HIGH); delay(1500);
         digitalWrite(YELLOW, LOW);
 
+        // turns on the red LED for 5 seconds
         printf("STOP!\n");
         digitalWrite(RED, HIGH); delay(5000);
         digitalWrite(RED, LOW);

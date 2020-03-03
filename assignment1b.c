@@ -30,12 +30,14 @@
 #define LOW "0"
 
 int write_to_fs(int write_max, char* format, char* path){
+    // opens the file on the given path with the permission to write only
     int fd = open(path, O_WRONLY);
     if(fd == -1) {
         fprintf(stderr, "Failed to open %s\n", path);
         return -1;
     }
     
+    // writes the format on the file
     ssize_t bytes_written = write(fd, format, write_max);
     if(bytes_written == -1) {
         fprintf(stderr, "Failed to write %s on file\n", format);
@@ -46,6 +48,7 @@ int write_to_fs(int write_max, char* format, char* path){
     return 0;
 }
 
+// used to export the gpio pins and returns -1 if it fails
 int gpio_export(int pin) {
     char export_path[] = "/sys/class/gpio/export";
     
@@ -61,6 +64,7 @@ int gpio_export(int pin) {
     return 0;
 }
 
+// used to unexport the gpio pins and returns -1 if it fails
 int gpio_unexport(int pin) {
     char export_path[] = "/sys/class/gpio/unexport";
     
@@ -76,6 +80,7 @@ int gpio_unexport(int pin) {
     return 0;
 }
 
+// sets the direction of the pin to dir (out/in) and returns -1 if it fails
 int gpio_set_direction(int pin, char* dir) {
     int direction_path_max = 50;
     char direction_path[direction_path_max];
@@ -89,6 +94,8 @@ int gpio_set_direction(int pin, char* dir) {
     return 0;
 }
 
+// writes the value of the pin (0 - to turn it off, 1 - to turn it on) 
+// and returns -1 if it fails
 int gpio_write(int pin, char* value) {
     int value_path_max = 50;
     char value_path[value_path_max];
@@ -105,6 +112,7 @@ int gpio_write(int pin, char* value) {
 }
 
 int main(void) {
+    // enables and sets the direction of the pins for the LEDs
     gpio_export(GREEN_PIN);
     gpio_set_direction(GREEN_PIN, OUTPUT);
     
@@ -115,18 +123,21 @@ int main(void) {
     gpio_set_direction(RED_PIN, OUTPUT);
 
     for (int i = 0; i < CYCLE; i++) {
+        // turns on the green LED for 6 seconds
         if (gpio_write(GREEN_PIN, HIGH) == 0) {
             printf("GO!\n"); 
             sleep(6);
         } 
         gpio_write(GREEN_PIN, LOW); 
 
+        // turns on the yellow LED for 1.5 seconds
         if (gpio_write(YELLOW_PIN, HIGH) == 0) {
             printf("Proceed with caution...\n");
             sleep(1.5);
         } 
         gpio_write(YELLOW_PIN, LOW);
 
+        // turns on the red LED for 5 seconds
         if (gpio_write(RED_PIN, HIGH) == 0) {
             printf("STOP!\n");
             sleep(5);
@@ -134,6 +145,7 @@ int main(void) {
         gpio_write(RED_PIN, LOW);
     }
 
+    // disables the pins that the LEDs used
     gpio_unexport(GREEN_PIN);
     gpio_unexport(YELLOW_PIN);
     gpio_unexport(RED_PIN);
