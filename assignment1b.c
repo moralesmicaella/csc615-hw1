@@ -1,4 +1,4 @@
-/************************************************************** 
+/**************************************************************** 
 * Class: CSC-615-01 Spring 2020
 * Name: Micaella Morales
 * Student ID: 916832064
@@ -6,8 +6,13 @@
 * File: assignment1b.c
 *
 * Description:
-*
-**************************************************************/
+* This file uses the available sysfs interface to create a 
+* traffic light. The green LED turns on for 6 seconds, followed
+* by the yellow LED for 1.5 seconds, and lastly, the red LED  
+* for 5 seconds. 
+* To compile this file, enter make.
+* To run this file, enter sudo ./assignment1b
+****************************************************************/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -41,7 +46,6 @@ int write_to_fs(int write_max, char* format, char* path){
     return 0;
 }
 
-
 int gpio_export(int pin) {
     char export_path[] = "/sys/class/gpio/export";
     
@@ -73,9 +77,9 @@ int gpio_unexport(int pin) {
 }
 
 int gpio_set_direction(int pin, char* dir) {
-    int direction_max_size = 50;
-    char direction_path[direction_max_size];
-    snprintf(direction_path, direction_max_size, "/sys/class/gpio/gpio%d/direction", pin);
+    int direction_path_max = 50;
+    char direction_path[direction_path_max];
+    snprintf(direction_path, direction_path_max, "/sys/class/gpio/gpio%d/direction", pin);
 
     if(write_to_fs(3, dir, direction_path) == -1) {
         fprintf(stderr, "Failed to set the direction of pin %d\n", pin);
@@ -86,12 +90,12 @@ int gpio_set_direction(int pin, char* dir) {
 }
 
 int gpio_write(int pin, char* value) {
-    int value_max_size = 50;
-    char value_path[value_max_size];
+    int value_path_max = 50;
+    char value_path[value_path_max];
 
     int max_size = 3;
 
-    snprintf(value_path, value_max_size, "/sys/class/gpio/gpio%d/value", pin);
+    snprintf(value_path, value_path_max, "/sys/class/gpio/gpio%d/value", pin);
     if(write_to_fs(max_size, value, value_path) == -1) {
         fprintf(stderr, "Failed to write on pin %d\n", pin);
         return -1;

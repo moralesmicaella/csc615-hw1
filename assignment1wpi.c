@@ -1,4 +1,4 @@
-/************************************************************** 
+/******************************************************************
 * Class: CSC-615-01 Spring 2020
 * Name: Micaella Morales
 * Student ID: 916832064
@@ -6,8 +6,13 @@
 * File: assignment1wpi.c
 *
 * Description:
-*
-**************************************************************/
+* This file uses the WiringPi GPIO access library to create 
+* a traffic light. The green LED turns on for 6 seconds, followed
+* by the yellow LED for 1.5 seconds, and lastly, the red LED  
+* for 5 seconds. 
+* To compile this file, enter make
+* To run this file, enter ./assignment1wpi
+******************************************************************/
 
 #include <stdio.h>
 #include <wiringPi.h>
