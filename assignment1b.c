@@ -27,15 +27,9 @@
 int write_to_fs(int write_max, char* format, char* path){
     int fd = open(path, O_WRONLY);
     if(fd == -1) {
-        fprintf(stderr, "Failed to open file\n");
+        fprintf(stderr, "Failed to open %s\n", path);
         return -1;
     }
-
-    /*bytes_formatted = snprintf(buffer, write_max, format);
-    if(bytes_formatted == -1) {
-        fprintf(stderr, "Failed to format what to write\n");
-        return -1;
-    }*/
     
     ssize_t bytes_written = write(fd, format, write_max);
     if(bytes_written == -1) {
@@ -48,7 +42,7 @@ int write_to_fs(int write_max, char* format, char* path){
 }
 
 
-void gpio_export(int pin) {
+int gpio_export(int pin) {
     char export_path[] = "/sys/class/gpio/export";
     
     int max_size = 3;
@@ -57,10 +51,13 @@ void gpio_export(int pin) {
 
     if(write_to_fs(max_size, buffer, export_path) == -1) {
         fprintf(stderr, "Failed to export pin %s\n", buffer);
+        return -1;
     }
+
+    return 0;
 }
 
-void gpio_unexport(int pin) {
+int gpio_unexport(int pin) {
     char export_path[] = "/sys/class/gpio/unexport";
     
     int max_size = 3;
@@ -69,17 +66,23 @@ void gpio_unexport(int pin) {
 
     if(write_to_fs(max_size, buffer, export_path) == -1) {
         fprintf(stderr, "Failed to unexport pin %s\n", buffer);
+        return -1;
     }
+
+    return 0;
 }
 
-void gpio_set_direction(int pin, char* dir) {
+int gpio_set_direction(int pin, char* dir) {
     int direction_max_size = 50;
     char direction_path[direction_max_size];
     snprintf(direction_path, direction_max_size, "/sys/class/gpio/gpio%d/direction", pin);
 
     if(write_to_fs(3, dir, direction_path) == -1) {
         fprintf(stderr, "Failed to set the direction of pin %d\n", pin);
+        return -1;
     }
+
+    return 0;
 }
 
 int gpio_write(int pin, char* value) {
@@ -87,8 +90,6 @@ int gpio_write(int pin, char* value) {
     char value_path[value_max_size];
 
     int max_size = 3;
-    //char buffer[max_size];
-    //snprintf(buffer, max_size, "%d", value);
 
     snprintf(value_path, value_max_size, "/sys/class/gpio/gpio%d/value", pin);
     if(write_to_fs(max_size, value, value_path) == -1) {
@@ -110,19 +111,19 @@ int main(void) {
     gpio_set_direction(RED_PIN, OUTPUT);
 
     for (int i = 0; i < CYCLE; i++) {
-        if (gpio_write(GREEN_PIN, HIGH) == -1) {
+        if (gpio_write(GREEN_PIN, HIGH) == 0) {
             printf("GO!\n"); 
             sleep(6);
         } 
         gpio_write(GREEN_PIN, LOW); 
 
-        if (gpio_write(YELLOW_PIN, HIGH) == -1) {
+        if (gpio_write(YELLOW_PIN, HIGH) == 0) {
             printf("Proceed with caution...\n");
             sleep(1.5);
         } 
         gpio_write(YELLOW_PIN, LOW);
 
-        if (gpio_write(RED_PIN, HIGH) == -1) {
+        if (gpio_write(RED_PIN, HIGH) == 0) {
             printf("STOP!\n");
             sleep(5);
         } 
