@@ -82,7 +82,7 @@ void gpio_set_direction(int pin, char* dir) {
     }
 }
 
-void gpio_write(int pin, char* value) {
+int gpio_write(int pin, char* value) {
     int value_max_size = 50;
     char value_path[value_max_size];
 
@@ -93,7 +93,10 @@ void gpio_write(int pin, char* value) {
     snprintf(value_path, value_max_size, "/sys/class/gpio/gpio%d/value", pin);
     if(write_to_fs(max_size, value, value_path) == -1) {
         fprintf(stderr, "Failed to write on pin %d\n", pin);
+        return -1;
     }
+
+    return 0;
 }
 
 int main(void) {
@@ -107,16 +110,22 @@ int main(void) {
     gpio_set_direction(RED_PIN, OUTPUT);
 
     for (int i = 0; i < CYCLE; i++) {
-        printf("GO!\n");
-        gpio_write(GREEN_PIN, HIGH); sleep(6);
+        if (gpio_write(GREEN_PIN, HIGH) == -1) {
+            printf("GO!\n"); 
+            sleep(6);
+        } 
         gpio_write(GREEN_PIN, LOW); 
 
-        printf("Proceed with caution...\n");
-        gpio_write(YELLOW_PIN, HIGH); sleep(1.5);
+        if (gpio_write(YELLOW_PIN, HIGH) == -1) {
+            printf("Proceed with caution...\n");
+            sleep(1.5);
+        } 
         gpio_write(YELLOW_PIN, LOW);
 
-        printf("STOP!\n");
-        gpio_write(RED_PIN, HIGH); sleep(5);
+        if (gpio_write(RED_PIN, HIGH) == -1) {
+            printf("STOP!\n");
+            sleep(5);
+        } 
         gpio_write(RED_PIN, LOW);
     }
 
