@@ -21,28 +21,25 @@
 #define CYCLE 2
 
 #define OUTPUT "out"
-#define HIGH 1
-#define LOW 0
+#define HIGH "1"
+#define LOW "0"
 
 int write_to_fs(int write_max, char* format, char* path){
-    char buffer[write_max];
-    ssize_t bytes_formatted, bytes_written;
-
     int fd = open(path, O_WRONLY);
     if(fd == -1) {
         fprintf(stderr, "Failed to open file\n");
         return -1;
     }
 
-    bytes_formatted = snprintf(buffer, write_max, format);
+    /*bytes_formatted = snprintf(buffer, write_max, format);
     if(bytes_formatted == -1) {
         fprintf(stderr, "Failed to format what to write\n");
         return -1;
-    }
+    }*/
     
-    bytes_written = write(fd, buffer, bytes_formatted);
+    ssize_t bytes_written = write(fd, format, write_max);
     if(bytes_written == -1) {
-        fprintf(stderr, "Failed to write on file\n");
+        fprintf(stderr, "Failed to write %s on file\n", *format);
         return -1;
     }
     close(fd);
@@ -53,89 +50,48 @@ int write_to_fs(int write_max, char* format, char* path){
 
 void gpio_export(int pin) {
     char export_path[] = "/sys/class/gpio/export";
-    char buffer[3];
-    snprintf(buffer, 3, "%d", pin);
-    if(write_to_fs(5, buffer, export_path) == -1) {
-        fprintf(stderr, "Failed to export pin %d\n", pin);
+    
+    int max_size = 3;
+    char buffer[max_size];
+    snprintf(buffer, max_size, "%d", pin);
+
+    if(write_to_fs(max_size, buffer, export_path) == -1) {
+        fprintf(stderr, "Failed to export pin %s\n", buffer);
     }
 }
 
 void gpio_unexport(int pin) {
     char export_path[] = "/sys/class/gpio/unexport";
-    char buffer[3];
-    snprintf(buffer, 3, "%d", pin);
-    if(write_to_fs(5, buffer, export_path) == -1) {
-        fprintf(stderr, "Failed to unexport pin %d\n", pin);
+    
+    int max_size = 3;
+    char buffer[max_size];
+    snprintf(buffer, max_size, "%d", pin);
+
+    if(write_to_fs(max_size, buffer, export_path) == -1) {
+        fprintf(stderr, "Failed to unexport pin %s\n", buffer);
     }
 }
 
-void gpio_set_direction(int pin, char dir[]) {
-    char buffer[5];
-    ssize_t bytes_formatted, bytes_written;
-    
-    int direction_max = 50;
-    char path[direction_max];
-    snprintf(path, direction_max, "/sys/class/gpio/gpio%d/direction", pin);
-    int fd = open(path, O_WRONLY);
-    if(fd == -1) {
-        fprintf(stderr, "Failed to open file\n");
-    }
+void gpio_set_direction(int pin, char* dir) {
+    int direction_max_size = 50;
+    char direction_path[direction_max_size];
+    snprintf(direction_path, direction_max_size, "/sys/class/gpio/gpio%d/direction", pin);
 
-    bytes_formatted = snprintf(buffer, 5, "out");
-    if(bytes_formatted == -1) {
-        fprintf(stderr, "Failed to format what to write\n");
-    }
-    
-    bytes_written = write(fd, buffer, bytes_formatted);
-    if(bytes_written == -1) {
-        fprintf(stderr, "Failed to write on file\n");
-    }
-    close(fd);
-}
-
-void gpio_set_dir(int pin, char dir[]) {
-    int direction_max = 50;
-    char direction_path[direction_max];
-
-    snprintf(direction_path, direction_max, "/sys/class/gpio/gpio%d/direction", pin);
-    if(write_to_fs(5, dir, direction_path) == -1) {
+    if(write_to_fs(3, &dir, direction_path) == -1) {
         fprintf(stderr, "Failed to set the direction of pin %d\n", pin);
     }
 }
 
-void gpio_write(int pin, int value) {
-    char buffer[10];
-    ssize_t bytes_formatted, bytes_written;
-    int value_max = 60;
-    char path[value_max];
+void gpio_write(int pin, char* value) {
+    int value_max_size = 50;
+    char value_path[value_max_size];
 
-    snprintf(path, value_max, "/sys/class/gpio/gpio%d/value", pin);
-    int fd = open(path, O_WRONLY);
-    if(fd == -1) {
-        fprintf(stderr, "Failed to open file for write\n");
-        
-    }
+    int max_size = 3;
+    //char buffer[max_size];
+    //snprintf(buffer, max_size, "%d", value);
 
-    bytes_formatted = snprintf(buffer, 10, "%d", value);
-    if(bytes_formatted == -1) {
-        fprintf(stderr, "Failed to format what to write\n");
-        
-    }
-    
-    bytes_written = write(fd, buffer, bytes_formatted);
-    if(bytes_written == -1) {
-        fprintf(stderr, "Failed to write on file\n");
-        
-    }
-    close(fd);
-}
-
-void gpio_wr(int pin, char value[]) {
-    int value_max = 50;
-    char value_path[value_max];
-
-    snprintf(value_path, value_max, "/sys/class/gpio/gpio%d/value", pin);
-    if(write_to_fs(5, value, value_path) == -1) {
+    snprintf(value_path, value_max_size, "/sys/class/gpio/gpio%d/value", pin);
+    if(write_to_fs(max_size, value, value_path) == -1) {
         fprintf(stderr, "Failed to write on pin %d\n", pin);
     }
 }
