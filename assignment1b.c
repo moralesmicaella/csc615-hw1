@@ -39,7 +39,7 @@ int write_to_fs(int write_max, char* format, char* path){
     
     ssize_t bytes_written = write(fd, format, write_max);
     if(bytes_written == -1) {
-        fprintf(stderr, "Failed to write %s on file\n", *format);
+        fprintf(stderr, "Failed to write %s on file\n", format);
         return -1;
     }
     close(fd);
@@ -77,7 +77,7 @@ void gpio_set_direction(int pin, char* dir) {
     char direction_path[direction_max_size];
     snprintf(direction_path, direction_max_size, "/sys/class/gpio/gpio%d/direction", pin);
 
-    if(write_to_fs(3, &dir, direction_path) == -1) {
+    if(write_to_fs(3, dir, direction_path) == -1) {
         fprintf(stderr, "Failed to set the direction of pin %d\n", pin);
     }
 }
